@@ -36,5 +36,7 @@ runs:
       shell: bash
       env:
         INPUT_USER_NAME: ${{ inputs.user_name }}
-      run: python ${{ github.action_path }}/main.py
+      run: |
+        #python ${{ github.action_path }}/main.py
+        uv tool run --from git+https://github.com/cav71/action-python-project builder
 

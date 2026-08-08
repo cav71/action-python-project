@@ -1,0 +1,19 @@
+name: Test Custom Action
+on: [push]
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v7
+
+      - name: Run Local Action
+        id: greet
+        uses: cav71/action-python-project   # References the action defined in the root directory
+        with:
+          user_name: 'GitHub Innovator'
+
+      - name: Print Action Output
+        run: echo "The action returned: ${{ steps.greet.outputs.status_message }}"
+

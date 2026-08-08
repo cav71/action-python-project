@@ -1,3 +1,4 @@
+import sys
 import os
 
 def main():
@@ -11,6 +12,9 @@ def main():
     if "GITHUB_OUTPUT" in os.environ:
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
             f.write(f"status_message=Successfully greeted {user_name}\n")
+    print("Python", sys.executable)
+    print("Version", sys.version)
+
 
 if __name__ == "__main__":
     main()

@@ -16,5 +16,5 @@ jobs:
 
       - name: Print Action Output
         shell: bash
-        run: echo "The action returned: ${{ steps.greet.outputs.status_message }}"
+        run: echo "The action returned: {{ steps.greet.outputs.status_message }}"
 

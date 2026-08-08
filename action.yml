@@ -23,6 +23,7 @@ runs:
       uses: astral-sh/setup-uv@v9.0.0
 
     - name: Create venv
+      shell: bash
       run: |
         uv sync --no-managed-python
 

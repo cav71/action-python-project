@@ -350,7 +350,7 @@ def parse_arguments():
     parser.add_argument("--pypidata", type=Path)
     parser.add_argument("--gitdump", type=Path)
 
-    parser.add_argument("mode", choices=list(map(str, ReleaseMode)))
+    parser.add_argument("mode", choices=list(map(str, ReleaseMode)), type=lambda t: t.partition("/")[0])
     parser.add_argument("paths", nargs="*", type=lambda p: relative_to(Path(p)))
     args = parser.parse_args()
     args.error = parser.error

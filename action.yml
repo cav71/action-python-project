@@ -1,10 +1,10 @@
-name: 'Python Custom Greeter'
+name: 'Python project builder'
 description: 'A sample custom GitHub Action written in Python'
 inputs:
-  user_name:
-    description: 'The name of the person to greet'
+  python-version:
+    description: "The python version to use"
     required: true
-    default: 'Developer'
+
 outputs:
   status_message:
     description: 'The final status message'
@@ -12,17 +12,15 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    # https://github.com/actions/setup-python
+    - name: Install Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v7
       with:
-        python-version: '3.11'
+        python-version: ${{ python-version }}
 
-    - name: Install Dependencies
-      shell: bash
-      run: |
-        if [ -f requirements.txt ]; then
-          pip install -r requirements.txt
-        fi
+    # https://github.com/astral-sh/setup-uv
+    - name: Install uv
+      uses: astral-sh/setup-uv@v9.0.0
 
     - name: Run Python Script
       shell: bash

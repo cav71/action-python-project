@@ -12,7 +12,7 @@ jobs:
         id: greet
         uses: cav71/action-python-project@main   # References the action defined in the root directory
         with:
-          user_name: 'GitHub Innovator'
+          python-version: 3.14
 
       - name: Print Action Output
         shell: bash

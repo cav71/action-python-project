@@ -26,6 +26,7 @@ runs:
       shell: bash
       run: |
         uv sync --no-managed-python
+        find .
 
     - name: Run Python Script
       shell: bash

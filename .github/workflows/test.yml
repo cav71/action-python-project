@@ -10,7 +10,7 @@ jobs:
 
       - name: Run Local Action
         id: greet
-        uses: cav71/action-python-project   # References the action defined in the root directory
+        uses: ./   # References the action defined in the root directory
         with:
           user_name: 'GitHub Innovator'
 

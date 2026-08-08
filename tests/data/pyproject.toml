@@ -1,0 +1,89 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lektor-ng"
+version = "0.0.0"
+
+description = "A fork of a static content management system (Lektor)."
+
+authors = [
+    { name = "A. Cavallo", email = "a.cavallo@cavallinux.eu" },
+]
+
+license = "BSD-3-Clause"
+
+license-files = [
+    "licenses/LICENSE",
+    "licenses/LICENSE.new",
+]
+
+urls.Homepage = "https://github.com/cav71/lektor-ng"
+urls.Source = "https://github.com/cav71/lektor-ng"
+
+classifiers = [
+    "Framework :: Lektor",
+    "Development Status :: 1 - Planning",
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+requires-python = ">=3.11"
+
+dependencies = [
+    "build",
+    "Babel",
+    "click>=6.0",
+    "Flask",
+    "Jinja2>=3.0",
+    "MarkupSafe",
+    "marshmallow",
+    "marshmallow_dataclass>=8.5.9",
+    "mistune>=0.7.0,<3,!=2.0.*",
+    "Pillow>=6",
+    "pip",
+    "python-slugify",
+    "requests",
+    "tzdata; sys_platform == 'win32'",
+    "watchfiles>=0.12",
+    "Werkzeug>=2.1.0",
+]
+optional-dependencies.ipython = [
+    "ipython",
+    "traitlets",
+]
+
+[project.scripts]
+lektor-ng = "lektor.cli:main"
+
+[dependency-groups]
+dev = [                         # generally useful during development
+    "coverage[toml]",
+    "hatchling",
+    "iniconfig",
+    "iniconfig",
+    "pylint==4.0.4",
+    "pytest-click",
+    "pytest-cov",
+    "pytest-html",
+    "pytest-mock",
+    "pytest>=6",
+    "ruff",
+    "mypy",
+]
+
+[tool.hatch.build]
+artifacts = [
+    "/lektor/admin/static",
+]

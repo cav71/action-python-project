@@ -1,0 +1,15 @@
+{
+  "event": {
+    "repository": {
+      "default_branch": "main",
+      "html_url": "https://github.com/cav71/lektor-ng",
+      "name": "lektor-ng"
+    }
+  },
+  "ref": "refs/heads/beta/0.0.0",
+  "ref_name": "beta/0.0.0",
+  "repository": "cav71/lektor-ng",
+  "run_number": "39",
+  "sha": "5effa07c2baaf03d71b23afaf823d1c7bf08fbc5",
+  "workflow_ref": "cav71/lektor-ng/.github/workflows/beta.yml@refs/heads/beta/0.0.0"
+}

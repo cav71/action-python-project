@@ -4,6 +4,10 @@ inputs:
   python-version:
     description: "The python version to use"
     required: true
+  upload-coverage:
+    description: "Upload coverage data to codecov"
+    required: false
+    default: false
 
 outputs:
   status_message:
@@ -12,10 +16,13 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Welcome
-      shell: bash
-      run: |
-        echo "I'm ${{ github.server_url }}/${{ github.repository }}"
+    # https://github.com/actions/checkout
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        # WARNING!! this is important
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
 
     # https://github.com/actions/setup-python
     - name: Install Python ${{ matrix.python-version }}
@@ -32,11 +39,36 @@ runs:
       run: |
         uv sync --no-managed-python
 
-    - name: Run Python Script
-      shell: bash
-      env:
-        INPUT_USER_NAME: ${{ inputs.user_name }}
-      run: |
-        #python ${{ github.action_path }}/main.py
-        uv tool run --from git+https://github.com/cav71/action-python-project builder
+    - name: Run Python checks (format)
+      run: uv run ruff --verbose format --check
 
+    - name: Run Python checks (tests+coverage)
+      env:
+        OUTDIR: build/qa-${{ matrix.python-version }}-${{ matrix.os}}
+      shell: bash
+      run: |
+        mkdir -p ${OUTDIR}
+        echo "$GITHUB_DUMP" > ${OUTDIR}/github.json
+        uv run pytest -vvs -l \
+            --cov=$(basename src/*) \
+            --cov-report=html:$OUTDIR/coverage --cov-report=xml:$OUTDIR/coverage.xml \
+            --junitxml=$OUTDIR/junit/junit.xml --html=$OUTDIR/junit/junit.html --self-contained-html \
+          tests
+
+    # # https://github.com/codecov/codecov-action
+    # - name: Upload coverage reports to Codecov
+    #   uses: codecov/codecov-action@v7
+    #   if: ${{ (matrix.python-version == env.TARGETPY) && (matrix.os == env.TARGETOS) }}
+    #   with:
+    #     files: build/qa-${{ matrix.python-version }}-${{ matrix.os}}/coverage.xml
+    #     token: ${{ secrets.CODECOV_TOKEN }}
+    #     verbose: true # optional (default = false)
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: qa-results-${{ matrix.python-version }}-${{ matrix.os }}
+        path: |
+          build/qa-${{ matrix.python-version }}-${{ matrix.os}}
+      # Use always() to always run this step to publish test results when there are test failures
+      if: always()

@@ -16,7 +16,7 @@ runs:
     - name: Install Python ${{ matrix.python-version }}
       uses: actions/setup-python@v7
       with:
-        python-version: ${{ python-version }}
+        python-version: ${{ inputs.python-version }}
 
     # https://github.com/astral-sh/setup-uv
     - name: Install uv

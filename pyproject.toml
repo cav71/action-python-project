@@ -26,3 +26,7 @@ dependencies = [
 [dependency-groups]
 dev = [
 ]
+
+
+[project.scripts]
+builder = "action_python_project.hello:main"

@@ -12,6 +12,11 @@ outputs:
 runs:
   using: 'composite'
   steps:
+    - name: Welcome
+      shell: bash
+      run: |
+        echo "I'm ${{ github.server_url }}/${{ github.repository }}"
+
     # https://github.com/actions/setup-python
     - name: Install Python ${{ matrix.python-version }}
       uses: actions/setup-python@v7
@@ -26,7 +31,6 @@ runs:
       shell: bash
       run: |
         uv sync --no-managed-python
-        find .
 
     - name: Run Python Script
       shell: bash

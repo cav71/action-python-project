@@ -46,6 +46,7 @@ runs:
     - name: Run Python checks (tests+coverage)
       shell: bash
       env:
+        PYTHONPATH: src
         OUTDIR: build/qa-${{ matrix.python-version }}-${{ matrix.os}}
       run: |
         mkdir -p ${OUTDIR}

@@ -462,7 +462,8 @@ def main() -> None:
     # variable substitutions
     variables = {
         "version": gdata.version_string(),
-        "sha": gdata.sha,
+        "sha": gdata.sha or "N/A",
+        "sha7": (gdata.sha and gdata.sha[:7]) or "N/A",
         # below only optional
         "branch": gdata.branch,
         "mode": args.mode,
@@ -501,6 +502,7 @@ def main() -> None:
             save(path)
             (replacer_jinja2 if args.use_jinja2 else replacer)(path, variables)
 
+        breakpoint()
         # building wheel
         log.info("building wheel package in %s", args.pyprojectpath.parent)
         if not args.dryrun:

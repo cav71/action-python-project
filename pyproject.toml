@@ -22,13 +22,19 @@ classifiers = [
 
 dependencies = [
     "build",
+    "jinja2",
 ]
 
 [dependency-groups]
 dev = [
+    "mypy",
+    "ruff",
     "pytest",
 ]
 
 
 [project.scripts]
 builder = "action_python_project.builder:main"
+
+[tools.builder]
+use-jinja2 = true

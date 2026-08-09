@@ -20,7 +20,6 @@ import shutil
 import subprocess
 import sys
 import textwrap
-import tomllib
 import urllib.error
 import urllib.request
 from collections.abc import Callable, Generator
@@ -28,6 +27,8 @@ from enum import StrEnum, auto
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, TypedDict
+
+import tomllib
 
 log = logging.getLogger(__name__)
 
@@ -68,7 +69,9 @@ class Runner:
         verbose = self.verbose if verbose is None else verbose
         cmd = [str(c) for c in [*(self.exe or []), *args]]
         if capture:
-            return subprocess.check_output(cmd, encoding="utf-8", stderr=None if verbose else subprocess.DEVNULL)
+            return subprocess.check_output(
+                cmd, encoding="utf-8", stderr=None if verbose else subprocess.DEVNULL
+            )
         return subprocess.check_call(
             cmd,
             encoding="utf-8",
@@ -91,7 +94,9 @@ class Git:
 
     def default(self):
         return (
-            self.runner(["symbolic-ref", "refs/remotes/origin/HEAD", "--short"], capture=True)
+            self.runner(
+                ["symbolic-ref", "refs/remotes/origin/HEAD", "--short"], capture=True
+            )
             .strip()
             .rpartition("/")[2]
             .rpartition("/")[2]
@@ -107,7 +112,7 @@ class Git:
 @dc.dataclass
 class GData:
     name: str  # acbox
-    sha: str  # 33eebf59f98adc51ee62f4db4a9ced2cb84bdaa2
+    sha: str | None  # 33eebf59f98adc51ee62f4db4a9ced2cb84bdaa2
     version: str
     mode: ReleaseMode
     number: int | None = None
@@ -235,11 +240,13 @@ def get_gdata(
     name = pyproject["project"]["name"]
     version = pyproject["project"]["version"]
 
-    sha = rget(gitdump, "sha") or (git and git.sha())
+    sha = rget(gitdump, "sha") or (git and git.sha() or None)
     log.debug("got sha '%s'", sha)
 
     branch = rget(gitdump, "ref") or (git and git.branch())
-    default_branch = rget(gitdump, "event.repository.default_branch") or (git and git.default())
+    default_branch = rget(gitdump, "event.repository.default_branch") or (
+        git and git.default()
+    )
     log.debug("got branch '%s' (default %s)", branch, default_branch)
 
     if not (branch and default_branch):
@@ -269,7 +276,9 @@ def pypi_fetch_data(name):
         return None
 
 
-def pypi_parse_releases(name: str, data: dict[str, Any] | None = None) -> Releases | None:
+def pypi_parse_releases(
+    name: str, data: dict[str, Any] | None = None
+) -> Releases | None:
     if not (data := data or pypi_fetch_data(name)):
         return None
     exprs = {
@@ -279,10 +288,10 @@ def pypi_parse_releases(name: str, data: dict[str, Any] | None = None) -> Releas
     }
 
     releases: Releases = {
+        "versions": [],
         "releases": [],
         "betas": collections.defaultdict(list),
         "posts": collections.defaultdict(list),
-        "versions": [],
         "category": {},
     }
     for version in (data or {}).get("releases", []):
@@ -295,12 +304,14 @@ def pypi_parse_releases(name: str, data: dict[str, Any] | None = None) -> Releas
             raise RuntimeError(f"cannot identify {version=}")
 
         if kind == "releases":
-            releases[key].append(match.group("version"))
+            releases["releases"].append(match.group("version"))
+        elif kind in {"betas", "posts"}:
+            releases[kind][match.group("version")].append(int(match.group("number")))  # type: ignore[literal-required]
         else:
-            releases[key][match.group("version")].append(int(match.group("number")))
+            raise RuntimeError(f"invalid {kind=}")
 
         releases["versions"].append(version)
-        releases["category"][version] = kind
+        releases["category"][version] = kind  # type: ignore[assignment]
 
     return releases
 
@@ -334,23 +345,42 @@ def replacer(path: Path, variables: dict) -> None:
     path.write_text(txt)
 
 
+def replacer_jinja2(path: Path, variables: dict) -> None:
+    from jinja2 import Environment, Template
+
+    env = Environment()
+
+    txt = path.read_text()
+    template = env.from_string(txt)
+
+    path.write_text(template.render(variables))
+
+
 def parse_arguments():
     global CACHEDIR
     parser = argparse.ArgumentParser()
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-v", "--verbose", dest="loglevel", action="append_const", const=1)
-    group.add_argument("-q", "--quiet", dest="loglevel", action="append_const", const=-1)
+    group.add_argument(
+        "-v", "--verbose", dest="loglevel", action="append_const", const=1
+    )
+    group.add_argument(
+        "-q", "--quiet", dest="loglevel", action="append_const", const=-1
+    )
     parser.add_argument("-n", "--dry-run", dest="dryrun", action="store_true")
     parser.add_argument("-c", "--cache", type=Path)
-    parser.add_argument("--post-if-released", action="store_true")
     parser.add_argument("--dump", action="store_true")
+
+    parser.add_argument("-j", "--use-jinja2", action="store_true")
+    parser.add_argument("--post-if-released", action="store_true")
 
     parser.add_argument("--pyproject", type=Path, default=Path("pyproject.toml"))
     parser.add_argument("--pypidata", type=Path)
     parser.add_argument("--gitdump", type=Path)
 
-    parser.add_argument("mode", choices=list(map(str, ReleaseMode)), type=lambda t: t.partition("/")[0])
+    parser.add_argument(
+        "mode", choices=list(map(str, ReleaseMode)), type=lambda t: t.partition("/")[0]
+    )
     parser.add_argument("paths", nargs="*", type=lambda p: relative_to(Path(p)))
     args = parser.parse_args()
     args.error = parser.error
@@ -362,7 +392,9 @@ def parse_arguments():
 
     # LOG
     args.loglevel = max(min(sum(args.loglevel or [0]), 1), -1)
-    logging.basicConfig(level={-1: logging.WARNING, 0: logging.INFO, 1: logging.DEBUG}[args.loglevel])
+    logging.basicConfig(
+        level={-1: logging.WARNING, 0: logging.INFO, 1: logging.DEBUG}[args.loglevel]
+    )
 
     # PYPROJECT
     args.pyprojectpath = relative_to(args.pyproject.resolve())
@@ -370,6 +402,9 @@ def parse_arguments():
     if not args.pyprojectpath.exists():
         args.error(f"file not present {args.pyprojectpath}")
     args.pyproject = tomllib.loads(args.pyprojectpath.read_text())
+
+    # rendered
+    args.use_jinja2 = args.use_jinja2 or rget(args.pyproject, "tools.builder.use-jinja2")
 
     # GITDUMP
     if args.gitdump:
@@ -406,7 +441,7 @@ def main() -> None:
     log.info("project name'%s'", name)
 
     gdata = get_gdata(args.mode, args.pyproject, args.gitdump, git)
-    pypi: Releases = pypi_parse_releases(name) or {}
+    pypi: Releases | dict = pypi_parse_releases(name) or {}
 
     # if the --post-if-released and we're releasing, we swicth to a post
     if (version := gdata.version_string()) in pypi.get("versions", []):
@@ -419,7 +454,7 @@ def main() -> None:
 
     # fixing gdata structure
     if args.mode in {ReleaseMode.BETA, ReleaseMode.POST}:
-        last = max(pypi.get(f"{args.mode}s", {}).get(gdata.version, [-1]))
+        last = max(pypi.get(f"{args.mode}s", {}).get(gdata.version, [-1]))  # type: ignore[union-attr]
         gdata.number = last + 1
 
     gdata.branch = git.branch()
@@ -454,7 +489,9 @@ def main() -> None:
         log.debug("fixing %s", args.pyprojectpath)
         save(args.pyprojectpath)
         lines = args.pyprojectpath.read_text().split("\n")
-        lineno = next(i for i, line in enumerate(lines) if re.search(r"^\s*version\s*=", line))
+        lineno = next(
+            i for i, line in enumerate(lines) if re.search(r"^\s*version\s*=", line)
+        )
         lines[lineno] = f'version = "{gdata.version_string()}"'
         args.pyprojectpath.write_text("\n".join(lines))
 
@@ -462,12 +499,14 @@ def main() -> None:
         for path in args.paths:
             log.info("fixing %s", path)
             save(path)
-            replacer(path, variables)
+            (replacer_jinja2 if args.use_jinja2 else replacer)(path, variables)
 
         # building wheel
         log.info("building wheel package in %s", args.pyprojectpath.parent)
         if not args.dryrun:
-            runc([sys.executable, "-m", "build", args.pyprojectpath.parent], verbose=True)
+            runc(
+                [sys.executable, "-m", "build", args.pyprojectpath.parent], verbose=True
+            )
 
 
 if __name__ == "__main__":

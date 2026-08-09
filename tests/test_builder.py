@@ -1,5 +1,3 @@
-import contextlib
-import json
 from unittest import mock
 
 import pytest
@@ -7,8 +5,14 @@ import pytest
 from action_python_project import builder
 
 REFS = [
-    ("cav71/lektor-ng/.github/workflows/beta.yml@refs/heads/beta/0.0.0", ("beta", "0.0.0")),
-    ("cav71/lektor-ng/.github/workflows/release.yml@refs/heads/release/0.0.0", ("release", "0.0.0")),
+    (
+        "cav71/lektor-ng/.github/workflows/beta.yml@refs/heads/beta/0.0.0",
+        ("beta", "0.0.0"),
+    ),
+    (
+        "cav71/lektor-ng/.github/workflows/release.yml@refs/heads/release/0.0.0",
+        ("release", "0.0.0"),
+    ),
     ("cav71/lektor-ng/.github/workflows/main.yml@refs/heads/main", ("main", None)),
     ("cav71/lektor-ng/.github/workflows/tags.yml@refs/tags/v0.0.0", (None, None)),
 ]
@@ -27,6 +31,7 @@ def test_parse_ref():
     for branch, expected in REFS:
         found = builder.parse_ref(branch.rpartition("@")[2], "main")
         assert expected == found
+
 
 @pytest.mark.parametrize("modetxt", ["release", "post", "beta"])
 def test_get_gdata_pyproject(loader, modetxt):
@@ -52,19 +57,12 @@ def test_get_gdata_pyproject(loader, modetxt):
 
 
 def test_get_gdata_git(loader):
-    pyproject = loader("pyproject", "toml")
+    # pyproject = loader("pyproject", "toml")
 
     git = mock.MagicMock()
     git.default.return_value = "origin/main"
     git.branch.return_value = "release/0.0.0"
     git.sha.return_value = "ABCDFE"
-
-
-    return
-    gitdump = loader("gitdump.release")
-
-
-    pass
 
 
 # def test_pypi_parse_releases(loader):

@@ -404,9 +404,7 @@ def parse_arguments():
     args.pyproject = tomllib.loads(args.pyprojectpath.read_text())
 
     # rendered
-    args.use_jinja2 = args.use_jinja2 or rget(
-        args.pyproject, "tool.builder.use-jinja2"
-    )
+    args.use_jinja2 = args.use_jinja2 or rget(args.pyproject, "tool.builder.use-jinja2")
 
     # GITDUMP
     if args.gitdump:

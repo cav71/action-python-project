@@ -1,8 +1,8 @@
 import json
-import tomllib
 from pathlib import Path
 
 import pytest
+import tomllib
 
 
 @pytest.fixture()
@@ -17,7 +17,11 @@ def loader(datadir):
         if typ == "json":
             return json.loads(txt)
         elif typ == "env":
-            return {line.partition("=")[0]: line.partition("=")[2] for line in txt.splitlines() if line.strip()}
+            return {
+                line.partition("=")[0]: line.partition("=")[2]
+                for line in txt.splitlines()
+                if line.strip()
+            }
         elif typ == "toml":
             return tomllib.loads(txt)
         else:

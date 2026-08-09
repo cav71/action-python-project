@@ -16,8 +16,8 @@ downloads:
 
 .PHONY: all
 all: tests
-	uv run ruff format src
-	uv run ruff check --fix src
+	uv run ruff format src tests
+	uv run ruff check --fix src tests
 
 .PHONY: tests
 tests: export PYTHONPATH=$(PWD)/src

@@ -40,12 +40,13 @@ runs:
         uv sync --no-managed-python
 
     - name: Run Python checks (format)
+      shell: bash
       run: uv run ruff --verbose format --check
 
     - name: Run Python checks (tests+coverage)
+      shell: bash
       env:
         OUTDIR: build/qa-${{ matrix.python-version }}-${{ matrix.os}}
-      shell: bash
       run: |
         mkdir -p ${OUTDIR}
         echo "$GITHUB_DUMP" > ${OUTDIR}/github.json

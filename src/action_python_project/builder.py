@@ -405,7 +405,7 @@ def parse_arguments():
 
     # rendered
     args.use_jinja2 = args.use_jinja2 or rget(
-        args.pyproject, "tools.builder.use-jinja2"
+        args.pyproject, "tool.builder.use-jinja2"
     )
 
     # GITDUMP

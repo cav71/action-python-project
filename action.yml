@@ -50,11 +50,7 @@ runs:
       run: |
         mkdir -p ${OUTDIR}
         echo "$GITHUB_DUMP" > ${OUTDIR}/github.json
-        uv run pytest -vvs -l \
-            --cov=$(basename src/*) \
-            --cov-report=html:$OUTDIR/coverage --cov-report=xml:$OUTDIR/coverage.xml \
-            --junitxml=$OUTDIR/junit/junit.xml --html=$OUTDIR/junit/junit.html --self-contained-html \
-          tests
+        uv run pytest -vvs tests
 
     # # https://github.com/codecov/codecov-action
     # - name: Upload coverage reports to Codecov

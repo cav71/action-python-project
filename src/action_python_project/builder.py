@@ -502,7 +502,6 @@ def main() -> None:
             save(path)
             (replacer_jinja2 if args.use_jinja2 else replacer)(path, variables)
 
-        breakpoint()
         # building wheel
         log.info("building wheel package in %s", args.pyprojectpath.parent)
         if not args.dryrun:

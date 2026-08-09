@@ -14,6 +14,11 @@ downloads:
 #	gh run list -R cav71/lektor-ng --limit 1 --json databaseId --jq '.[0].databaseId' > z.id && \
 #    gh api repos/cav71/lektor-ng/actions/runs/$(shell cat z.id)/logs > z.zip
 
+.PHONY: all
+all: tests
+	uv run ruff format src
+	uv run ruff check --fix src
+
 .PHONY: tests
 tests: export PYTHONPATH=$(PWD)/src
 tests:  ## run the support tests

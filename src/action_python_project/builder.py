@@ -346,7 +346,7 @@ def replacer(path: Path, variables: dict) -> None:
 
 
 def replacer_jinja2(path: Path, variables: dict) -> None:
-    from jinja2 import Environment, Template
+    from jinja2 import Environment
 
     env = Environment()
 
@@ -404,7 +404,9 @@ def parse_arguments():
     args.pyproject = tomllib.loads(args.pyprojectpath.read_text())
 
     # rendered
-    args.use_jinja2 = args.use_jinja2 or rget(args.pyproject, "tools.builder.use-jinja2")
+    args.use_jinja2 = args.use_jinja2 or rget(
+        args.pyproject, "tools.builder.use-jinja2"
+    )
 
     # GITDUMP
     if args.gitdump:

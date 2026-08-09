@@ -1,5 +1,5 @@
 import sys
-import os
+
 
 def main():
     print("Python", sys.executable)

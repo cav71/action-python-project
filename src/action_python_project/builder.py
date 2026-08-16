@@ -364,7 +364,7 @@ def replacer_jinja2(path: Path, variables: dict) -> None:
     txt = path.read_text()
     template = env.from_string(txt)
 
-    path.write_text(template.render(variables))
+    path.write_text(template.render(**variables))
 
 
 def parse_arguments():
@@ -483,6 +483,8 @@ def main() -> None:
     # variable substitutions
     variables = create_variables(args.mode, gdata)
     variables.update(gitdump_to_shields(args.gitdump))
+    if args.use_jinja2_namespace:
+        variables = {"gdata": SimpleNamespace(variables)}
 
     if args.dump:
         print("gdata:")

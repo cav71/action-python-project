@@ -33,7 +33,7 @@ def test_parse_ref():
         assert expected == found
 
 
-def test_renderer(loader):
+def test_variables(loader):
     pyproject = loader("pyproject", "toml")
     gitdump = loader("beta.gitdump", "json")
     gdata = builder.get_gdata(builder.ReleaseMode.RELEASE, pyproject, gitdump)

@@ -33,6 +33,21 @@ def test_parse_ref():
         assert expected == found
 
 
+def test_renderer(loader):
+    pyproject = loader("pyproject", "toml")
+    gitdump = loader("beta.gitdump", "json")
+    gdata = builder.get_gdata(builder.ReleaseMode.RELEASE, pyproject, gitdump)
+
+    variables = builder.create_variables(builder.ReleaseMode.RELEASE, gdata)
+    assert {
+        "branch": "beta",
+        "mode": builder.ReleaseMode.RELEASE,
+        "sha": "5effa07c2baaf03d71b23afaf823d1c7bf08fbc5",
+        "sha7": "5effa07",
+        "version": "0.0.0",
+    } == variables
+
+
 @pytest.mark.parametrize("modetxt", ["release", "post", "beta"])
 def test_get_gdata_pyproject(loader, modetxt):
     pyproject = loader("pyproject", "toml")

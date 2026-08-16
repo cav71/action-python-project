@@ -263,6 +263,17 @@ def get_gdata(
     )
 
 
+def create_variables(mode: ReleaseMode, gdata: GData):
+    return {
+        "version": gdata.version_string(),
+        "sha": gdata.sha or "N/A",
+        "sha7": (gdata.sha and gdata.sha[:7]) or "N/A",
+        # below only optional
+        "branch": gdata.branch,
+        "mode": mode,
+    }
+
+
 @cache("pypi-data")
 def pypi_fetch_data(name):
     url = f"https://pypi.org/pypi/{name}/json"
@@ -371,7 +382,14 @@ def parse_arguments():
     parser.add_argument("-c", "--cache", type=Path)
     parser.add_argument("--dump", action="store_true")
 
-    parser.add_argument("-j", "--use-jinja2", action="store_true")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-j", "--use-jinja2", action="store_true")
+    group.add_argument(
+        "-J",
+        "--use-jinja2-namespace",
+        help="when using jinja, make sure put variables under gdata",
+    )
+
     parser.add_argument("--post-if-released", action="store_true")
 
     parser.add_argument("--pyproject", type=Path, default=Path("pyproject.toml"))
@@ -405,6 +423,9 @@ def parse_arguments():
 
     # rendered
     args.use_jinja2 = args.use_jinja2 or rget(args.pyproject, "tool.builder.use-jinja2")
+    if args.use_jinja2_namespace:
+        args.use_jinja2 = True
+        args.use_jinja2_namespace = True
 
     # GITDUMP
     if args.gitdump:
@@ -460,14 +481,7 @@ def main() -> None:
     gdata.branch = git.branch()
 
     # variable substitutions
-    variables = {
-        "version": gdata.version_string(),
-        "sha": gdata.sha or "N/A",
-        "sha7": (gdata.sha and gdata.sha[:7]) or "N/A",
-        # below only optional
-        "branch": gdata.branch,
-        "mode": args.mode,
-    }
+    variables = create_variables(args.mode, gdata)
     variables.update(gitdump_to_shields(args.gitdump))
 
     if args.dump:
@@ -500,7 +514,8 @@ def main() -> None:
         for path in args.paths:
             log.info("fixing %s", path)
             save(path)
-            (replacer_jinja2 if args.use_jinja2 else replacer)(path, variables)
+            use_jinja2 = args.use_jinja2 or args.use_jinja2_namespace
+            (replacer_jinja2 if use_jinja2 else replacer)(path, variables)
 
         # building wheel
         log.info("building wheel package in %s", args.pyprojectpath.parent)

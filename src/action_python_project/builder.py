@@ -387,6 +387,7 @@ def parse_arguments():
     group.add_argument(
         "-J",
         "--use-jinja2-namespace",
+        action="store_true",
         help="when using jinja, make sure put variables under gdata",
     )
 

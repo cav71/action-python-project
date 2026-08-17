@@ -459,7 +459,7 @@ def main() -> None:
     log.info("current working dir '%s'", workdir)
 
     name = args.pyproject["project"]["name"]
-    log.info("project name'%s'", name)
+    log.info("project name '%s'", name)
 
     gdata = get_gdata(args.mode, args.pyproject, args.gitdump, git)
     pypi: Releases | dict = pypi_parse_releases(name) or {}
@@ -514,9 +514,9 @@ def main() -> None:
 
         # replace @version@ and @hash@
         for path in args.paths:
-            log.info("fixing %s", path)
-            save(path)
             use_jinja2 = args.use_jinja2 or args.use_jinja2_namespace
+            log.info("fixing %s (jinja2? %s)", path, "yes" if use_jinja2 else "no")
+            save(path)
             (replacer_jinja2 if use_jinja2 else replacer)(path, variables)
 
         # building wheel

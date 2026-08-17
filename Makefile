@@ -24,6 +24,11 @@ tests: export PYTHONPATH=$(PWD)/src
 tests:  ## run the support tests
 	uv run pytest -vvs tests
 
+.PHONY: lint
+lint:  ## apply linters
+	uv run ruff format src tests
+	uv run ruff check --fix
+
 .PHONY: release
 release:  ## test release builder
 	python support/builder.py $@ \

@@ -21,6 +21,7 @@ classifiers = [
 ]
 
 dependencies = [
+    "acbox",
     "build",
     "jinja2",
 ]
@@ -38,6 +39,7 @@ dev = [
 
 [project.scripts]
 builder = "action_python_project.builder:main"
+info = "action_python_project.info:main"
 
 [tools.builder]
 use-jinja2 = true

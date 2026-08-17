@@ -1,14 +1,23 @@
 ## builder tool
 
-Get a version string for a package and build the wheel.
 
-Examples:
+### Info
 
-Fetch from pyproject.toml the version and adds a N.M.ObXX number.
+Extract system info and checks:
+```
+uv tool run --from git+https://github.com/cav71/action-python-project info
+```
+
+You can pass extra "checkers", see [example.py](example.py).
+
+
+### Building
+Create a release:
 ```
   uv tool run --from git+https://github.com/cav71/action-python-project builder \
     beta README.md src/lektor_ng/__init__.py    
 ```
+Fetch from pyproject.toml the version and adds a N.M.ObXX number.
 
 Config:
 pyproject.toml
@@ -23,8 +32,3 @@ files = [
 
 
 ## TODO
-
-Things left to do:
-- fix mypy issues
-- use jinja2 file processing
-

@@ -336,12 +336,14 @@ def gitdump_to_shields(gitdump):
     )  # cav71/lektor-ng/.github/workflows/beta.yml@refs/heads/beta/0.0.0
     actionlink = ""
     expr = re.compile(
-        r"^(?P<owner>[^/]+)/(?P<project>[^/]+)/[.]github/workflows/(?P<target>[^@]+)@refs/heads/(?P<branch>.+)"
+        r"^(?P<owner>[^/]+)/(?P<project>[^/]+)/[.]github/workflows/(?P<target>[^@]+)@refs/(?P<head>(heads|tags))/(?P<branch>.+)"
     )
     if match := expr.search(workflow_ref):
         data = SimpleNamespace(**match.groupdict())
         actionlink = f"{data.owner}/{data.project}/{data.target}?branch={data.branch.replace('/', '%2F')}"
         actionurl = f"{data.target}?branch={data.branch.replace('/', '%2F')}"
+    else:
+        raise RuntimeError(f"un-handled ref '{workflow_ref}'")
 
     return {
         "actionlink": actionlink,
